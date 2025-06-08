@@ -32,10 +32,10 @@ class GoldETL:
         """
         self.cursor.execute("""
         CREATE VIEW IF NOT EXISTS gold_top_borrowed_books AS
-        SELECT b.Title, b.Author, COUNT(*) AS BorrowCount
-        FROM BorrowingRecords br
-        JOIN silver_books b ON br.BookID = b.BookID
-        GROUP BY br.BookID
+        SELECT book.Title, book.Author, COUNT(*) AS BorrowCount
+        FROM BorrowingRecords AS borrow
+        JOIN silver_books AS book ON borrow.BookID = book.BookID
+        GROUP BY borrow.BookID
         ORDER BY BorrowCount DESC
         LIMIT 10;
         """)
@@ -47,11 +47,11 @@ class GoldETL:
         """
         self.cursor.execute("""
         CREATE VIEW IF NOT EXISTS gold_unreturned_books AS
-        SELECT m.Name AS Borrower, b.Title, br.BorrowDate
-        FROM BorrowingRecords br
-        JOIN Members m ON br.MemberID = m.MemberID
-        JOIN silver_books b ON br.BookID = b.BookID
-        WHERE br.ReturnDate IS NULL;
+        SELECT member.Name AS Borrower, book.Title, borrow.BorrowDate
+        FROM BorrowingRecords AS borrow
+        JOIN Members AS member ON borrow.MemberID = member.MemberID
+        JOIN silver_books AS book ON borrow.BookID = book.BookID
+        WHERE borrow.ReturnDate IS NULL;
         """)
         self.conn.commit()
 
