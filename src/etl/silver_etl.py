@@ -15,21 +15,20 @@ class SilverETL:
         """
         Transforms bronze_books into silver_books with selected and cleaned columns.
         """
-        query = """
-        CREATE TABLE IF NOT EXISTS silver_books AS
-        SELECT DISTINCT
-            bookID AS BookID,
-            TRIM(title) AS Title,
-            TRIM(authors) AS Author,
-            publication_date AS YearPublished,
-            average_rating AS AvgRating
-        FROM bronze_books
-        WHERE title IS NOT NULL
-          AND authors IS NOT NULL
-          AND publication_date IS NOT NULL
-          AND average_rating IS NOT NULL;
-        """
-        self.cursor.execute(query)
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS silver_books AS
+            SELECT DISTINCT
+                bookID AS BookID,
+                TRIM(title) AS Title,
+                TRIM(authors) AS Author,
+                publication_date AS YearPublished,
+                average_rating AS AvgRating
+            FROM bronze_books
+            WHERE title IS NOT NULL
+            AND authors IS NOT NULL
+            AND publication_date IS NOT NULL
+            AND average_rating IS NOT NULL;
+        """)
         self.conn.commit()
 
     def create_members_table(self, total_members=20):
@@ -37,12 +36,15 @@ class SilverETL:
         Creates and populates the Members table with synthetic member data.
         """
         self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS Members (
-            MemberID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT NOT NULL,
-            JoinDate DATE DEFAULT (DATE('now'))
-        );
-        """)
+            CREATE TABLE IF NOT EXISTS Members (
+                MemberID 
+                    INTEGER 
+                    PRIMARY KEY 
+                    AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                JoinDate DATE DEFAULT (DATE('now'))
+            );
+            """)
         self.conn.commit()
 
         members = generate_member(total=total_members)
@@ -62,15 +64,22 @@ class SilverETL:
         records = generate_borrowing_records(book_ids, member_ids)
 
         self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS BorrowingRecords (
-            RecordID INTEGER PRIMARY KEY AUTOINCREMENT,
-            BookID INTEGER,
-            MemberID INTEGER,
-            BorrowDate DATE DEFAULT (DATE('now')),
-            ReturnDate DATE,
-            FOREIGN KEY (BookID) REFERENCES silver_books(BookID),
-            FOREIGN KEY (MemberID) REFERENCES Members(MemberID)
-        );
+            CREATE TABLE IF NOT EXISTS BorrowingRecords (
+                RecordID 
+                    INTEGER 
+                    PRIMARY KEY 
+                    AUTOINCREMENT,
+                BookID INTEGER,
+                MemberID INTEGER,
+                BorrowDate 
+                    DATE 
+                    DEFAULT (DATE('now')),
+                ReturnDate DATE,
+                FOREIGN KEY (BookID) 
+                    REFERENCES silver_books(BookID),
+                FOREIGN KEY (MemberID) 
+                    REFERENCES Members(MemberID)
+            );
         """)
         self.conn.commit()
 

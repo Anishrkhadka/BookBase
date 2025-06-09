@@ -2,6 +2,7 @@ import sqlite3
 import kagglehub
 import random
 from datetime import datetime, timedelta
+import os
 
 def download_dataset_from_kagglehub(name="jealousleopard/goodreadsbooks"):
     # Download latest version
@@ -51,3 +52,10 @@ def generate_borrowing_records(book_ids, member_ids):
             borrowing_records.append((book_id, member_id, borrow_date.date(), return_date))
 
     return borrowing_records
+
+def delete_sqlit_database(name="library.db"):
+    if os.path.exists(name):
+        os.remove(name)
+        print("Database deleted.")
+    else:
+        print("Database file does not exist.")

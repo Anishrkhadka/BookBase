@@ -16,12 +16,16 @@ class GoldETL:
         Creates a table of top-rated books from the Silver layer.
         """
         query = f"""
-        CREATE TABLE IF NOT EXISTS gold_top_books AS
-        SELECT Title, Author, YearPublished, AvgRating
-        FROM silver_books
-        WHERE AvgRating >= {min_rating}
-        ORDER BY AvgRating DESC
-        LIMIT {limit};
+            CREATE TABLE IF NOT EXISTS gold_top_books AS
+            SELECT 
+                Title, 
+                Author, 
+                YearPublished, 
+                AvgRating
+            FROM silver_books
+            WHERE AvgRating >= {min_rating}
+            ORDER BY AvgRating DESC
+            LIMIT {limit};
         """
         self.cursor.execute(query)
         self.conn.commit()
@@ -31,13 +35,17 @@ class GoldETL:
         Creates a view of the top 10 most borrowed books.
         """
         self.cursor.execute("""
-        CREATE VIEW IF NOT EXISTS gold_top_borrowed_books AS
-        SELECT book.Title, book.Author, COUNT(*) AS BorrowCount
-        FROM BorrowingRecords AS borrow
-        JOIN silver_books AS book ON borrow.BookID = book.BookID
-        GROUP BY borrow.BookID
-        ORDER BY BorrowCount DESC
-        LIMIT 10;
+            CREATE VIEW IF NOT EXISTS gold_top_borrowed_books AS
+            SELECT 
+                book.Title, 
+                book.Author, 
+                COUNT(*) AS BorrowCount
+            FROM BorrowingRecords AS borrow
+            JOIN silver_books AS book 
+                ON borrow.BookID = book.BookID
+            GROUP BY borrow.BookID
+            ORDER BY BorrowCount DESC
+            LIMIT 10;
         """)
         self.conn.commit()
 
@@ -46,12 +54,22 @@ class GoldETL:
         Creates a view of currently unreturned borrowed books.
         """
         self.cursor.execute("""
-        CREATE VIEW IF NOT EXISTS gold_unreturned_books AS
-        SELECT member.Name AS Borrower, book.Title, borrow.BorrowDate
-        FROM BorrowingRecords AS borrow
-        JOIN Members AS member ON borrow.MemberID = member.MemberID
-        JOIN silver_books AS book ON borrow.BookID = book.BookID
-        WHERE borrow.ReturnDate IS NULL;
+            CREATE VIEW IF NOT EXISTS gold_unreturned_books AS
+            SELECT 
+                member.Name AS Borrower,
+                book.Title,
+                borrow.BorrowDate,
+                JULIANDAY('now') - JULIANDAY(borrow.BorrowDate) AS DaysOut,
+                CASE 
+                    WHEN JULIANDAY('now') - JULIANDAY(borrow.BorrowDate) > 14 THEN 'Yes'
+                    ELSE 'No'
+                END AS IsOverdue
+            FROM BorrowingRecords AS borrow
+            JOIN Members AS member 
+                ON borrow.MemberID = member.MemberID
+            JOIN silver_books AS book 
+                ON borrow.BookID = book.BookID
+            WHERE borrow.ReturnDate IS NULL;
         """)
         self.conn.commit()
 
@@ -60,13 +78,13 @@ class GoldETL:
         Creates a view showing borrowing trends by month.
         """
         self.cursor.execute("""
-        CREATE VIEW IF NOT EXISTS gold_monthly_borrowing AS
-        SELECT 
-            strftime('%Y-%m', BorrowDate) AS Month,
-            COUNT(*) AS BorrowCount
-        FROM BorrowingRecords
-        GROUP BY Month
-        ORDER BY Month ASC;
+            CREATE VIEW IF NOT EXISTS gold_monthly_borrowing AS
+            SELECT 
+                strftime('%Y-%m', BorrowDate) AS Month,
+                COUNT(*) AS BorrowCount
+            FROM BorrowingRecords
+            GROUP BY Month
+            ORDER BY Month ASC;
         """)
         self.conn.commit()
 
