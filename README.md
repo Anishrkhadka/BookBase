@@ -121,6 +121,14 @@ erDiagram
 
 ## 📄 Streamlit Interface
 
+|  Available Books | Library Members | Borrowing Records  |
+|--------------|--------------|--------------|
+| ![](doc/img/screenshot_1.png) | ![](doc/img/screenshot_2.png) | ![](doc/img/screenshot_3.png) |
+
+| Top 10 Most | Currently Unreturned Books |
+|--------------|--------------|
+| ![](doc/img/screenshot_4.png) | ![](doc/img/screenshot_5.png) |
+
 The `Streamlit` UI lets users:
 - View books, members, and borrow records
 - See top borrowed books and members
