@@ -1,7 +1,6 @@
 import sqlite3
 import pandas as pd
 import streamlit as st
-from datetime import date
 
 # Connect to SQLite
 conn = sqlite3.connect("library.db")
