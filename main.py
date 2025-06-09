@@ -1,3 +1,7 @@
+
+from src.data.dataset_utils import delete_sqlit_database
+delete_sqlit_database("library.db") #we delete any exiting dataset called library.db for clean start
+
 from src.etl.bronze_etl import BronzeETL
 from src.etl.silver_etl import SilverETL
 from src.etl.gold_etl import GoldETL
@@ -8,7 +12,6 @@ def run_bronze_etl():
     bronze.download_data()
     bronze.load_raw_books()
     bronze.write_to_sqlite()
-
 
 def run_silver_etl():
     silver = SilverETL()
@@ -28,6 +31,7 @@ def run_gold_etl():
 
 
 def main():
+    
     print("Running Bronze ETL...")
     run_bronze_etl()
 
